@@ -1,0 +1,237 @@
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet -->
+  <link rel="stylesheet" href="lib/angular-material.min.css">
+  <link rel="stylesheet" href="lib/angular-chart.min.css">
+  <style>
+    .md-errors-spacer {
+      display: none;
+    }
+.actions {
+  clear: both;
+  text-align: right
+}
+    table {
+      width: 100%;
+    }
+
+    th {
+      background-color: rgb(63, 81, 181);
+      color: rgba(255, 255, 255, 0.87);
+    }
+
+    th,
+    td {
+      text-align: right;
+      border: 1px solid #FFFFFF;
+      padding: 5px 10px;
+    }
+
+    td {
+      text-transform: capitalize;
+    }
+
+    tr:nth-child(2n+2) {
+      background-color: #eeeeee;
+    }
+  </style>
+</head>
+
+<body ng-app="NewsDealer" ng-cloak>
+  <section layout-padding flex="noshrink" ng-controller="NewsDealerContorller as ndc" ng-cloak>
+    <div md-whiteframe ng-hide="ndc.showResults">
+      <div layout="column" layout-fill>
+        <md-toolbar>
+          <div class="md-toolbar-tools">
+            <span>News Dealer Problem Simulation</span>
+          </div>
+        </md-toolbar>
+        <md-content layout="column">
+          <div layout="row">
+            <div layout-padding flex="20">
+              <fieldset class="standard">
+                <legend>Parameters</legend>
+                <div layout="column">
+                  <md-input-container class="md-block">
+                    <label>Newspaper Cost</label>
+                    <input type="number" step="1" min="0" ng-model="ndc.model.cost">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>Newspaper Price</label>
+                    <input type="number" step="1" min="0" ng-model="ndc.model.price">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>Scrap Price</label>
+                    <input type="number" step="1" min="0" ng-model="ndc.model.scrapPrice">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>Recieved Newspaper per Day</label>
+                    <input type="number" step="1" min="0" ng-model="ndc.model.dailyCount">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>No of Days</label>
+                    <input type="number" step="1" min="1" ng-model="ndc.model.noOfDays">
+                  </md-input-container>
+                </div>
+              </fieldset>
+            </div>
+            <div layout-padding flex="20">
+              <fieldset class="standard">
+                <legend>Day Type</legend>
+                <div layout="column">
+                  <md-input-container class="md-block">
+                    <label>Good Day Probability (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="ndc.model.days.good">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block">
+                    <label>Good Day Cumulative Probability (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.model.days.good">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>Fair Day Probability (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="ndc.model.days.fair">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block" >
+                    <label>Fair Day Cumulative Probability (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.model.days.good + ndc.model.days.fair">
+                  </md-input-container>
+                  <md-input-container class="md-block">
+                    <label>Poor Day Probability (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="ndc.model.days.poor">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block">
+                    <label>Poor Day Cumulative Probability (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.model.days.good + ndc.model.days.fair + ndc.model.days.poor">
+                  </md-input-container>
+                </div>
+              </fieldset>
+            </div>
+            <div layout-padding  flex="60">
+              <fieldset class="standard">
+                <legend>Demands</legend>
+                <div layout="row" ng-repeat="d in ndc.model.demands">
+                  <md-input-container class="md-block" flex>
+                    <label>Demand</label>
+                    <input type="number" step="0.01" min="0" ng-model="d.demand">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block" flex>
+                    <label>Good (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="d.good">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block">
+                    <label>Good (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.demandsF('good', $index)">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block" flex>
+                    <label>Fair (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="d.fair">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block">
+                    <label>Fair (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.demandsF('fair', $index)">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block" flex>
+                    <label>Poor (f)</label>
+                    <input type="number" step="0.01" min="0" ng-model="d.poor">
+                  </md-input-container>
+                  <md-input-container md-no-float class="md-block">
+                    <label>Poor (F)</label>
+                    <input readonly type="number" step="0.01" min="0" ng-model="ndc.demandsF('poor', $index)">
+                  </md-input-container>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+          <div layout-padding class="actions">
+            <md-button ng-click="ndc.simulate()" class="md-raised" ng-disabled="!ndc.valid()">
+              Run Simulation
+            </md-button>
+            <span ng-show="!ndc.valid()">
+              Day Types and Demands Cumulative porbability must equal 1
+            </span>
+          </div>
+        </md-content>
+      </div>
+    </div>
+    <div md-whiteframe ng-show="ndc.showResults">
+      <div layout="column" layout-fill>
+        <md-toolbar>
+          <div class="md-toolbar-tools">
+            <span>News Dealer Problem Simulation - Results</span>
+            <span flex></span>
+            <md-button ng-click="ndc.simulate()">
+              Re Run
+            </md-button>
+            <md-button ng-click="ndc.showResults = false">
+              Back
+            </md-button>
+          </div>
+        </md-toolbar>
+        <md-content>
+          <div layout="row" layout-fill>
+            <div layout-padding>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Day Type</th>
+                    <th>Demand</th>
+                    <th>Revenue from Sales</th>
+                    <th>Lost Profit from Excess Demand</th>
+                    <th>Salvage from Sale of Scrap</th>
+                    <th>Cost</th>
+                    <th>Profit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="r in ndc.results">
+                    <td>{{r.i}}</td>
+                    <td>{{r.type}} ({{r.typeRandom | number:2}})</td>
+                    <td>{{r.demand}} ({{r.demandRandom | number:2}})</td>
+                    <td>{{r.revenue() / 100 | number:2}}</td>
+                    <td>{{r.loss() / 100 | number:2}}</td>
+                    <td>{{r.salvage() / 100 | number:2}}</td>
+                    <td>{{r.cost() / 100 | number:2}}</td>
+                    <td>{{r.profit() / 100 | number:2}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div layout-padding>
+              <table>
+                <thead>
+                  <tr>
+                    <th>BINs</th>
+                    <th>Frequency</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="f in ndc.frequencies">
+                    <td>{{f.label}}</td>
+                    <td>{{f.data}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div layout-padding flex>
+              <canvas id="bar" class="chart chart-bar" chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
+              </canvas>
+            </div>
+          </div>
+        </md-content>
+      </div>
+    </div>
+  </section>
+  <script src="lib/angular.min.js"></script>
+  <script src="lib/angular-animate.min.js"></script>
+  <script src="lib/angular-aria.min.js"></script>
+  <script src="lib/angular-messages.min.js"></script>
+  <script src="lib/angular-material.min.js"></script>
+  <script src="lib/chart.min.js"></script>
+  <script src="lib/angular-chart.min.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "news-dealer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "devDependencies": {
+    "browser-sync": "^2.12.8",
+    "gulp": "^3.9.1"
+  }
+}
